@@ -69,12 +69,11 @@ async def on_consume(event: MemberEvent, user: User=Depends(get_current_user)):
             await ctx.on_insert_obj([ConsumeRecord(**consume_dict)])
 
         try:
-            # send charge message
-            template_code = _Template.charge.value
-            template_param = json.dumps({"name": m_obj[0][0].name, "charge": event.charge, "balance": event.balance})
-            await sender.send_message(m_obj[0][0].phone, template_code, template_param)
-            # snd consume message
             # send message
+            if event.charge:
+                template_code = _Template.charge.value
+                template_param = json.dumps({"name": m_obj[0][0].name, "charge": event.charge, "balance": event.balance})
+                await sender.send_message(m_obj[0][0].phone, template_code, template_param)
             if event.consume:
                 template_code = _Template.consume.value
                 template_param = json.dumps({"name": m_obj[0][0].name, "consume": event.consume, "balance": event.balance})
