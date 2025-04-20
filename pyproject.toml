@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "crm_backend"
+version = "0.1.0"
+description = ""
+authors = ["hengxin.liu"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+oauthlib = "^3.2.2"
+asyncpg = "^0.30.0"
+fastapi = "^0.115.11"
+pandas = "^2.2.3"
+tencentcloud-sdk-python-common = "^3.0.1336"
+tencentcloud-sdk-python-sms = "^3.0.1336"
+jwt = "^1.3.1"
+uvicorn = "^0.34.0"
+pytest = "^8.3.5"
+httpx = "^0.28.1"
+psycopg = "^3.2.5"
+greenlet = "^3.1.1"
+pytest-dependency = "^0.6.0"
+apscheduler = "^3.11.0"
+toolz = "^1.0.0"
+alibabacloud-dysmsapi20170525 = "3.1.1"
+python-multipart = "^0.0.20"
+pyyaml = "^6.0.2"
+sqlalchemy = "^2.0.39"
+python-dotenv = "^1.1.0"
+pytest-env = "^1.1.5"
+openpyxl = "^3.1.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
