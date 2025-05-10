@@ -30,6 +30,22 @@ python-dotenv = "^1.1.0"
 pytest-env = "^1.1.5"
 openpyxl = "^3.1.5"
 
+[[tool.poetry.source]]
+name = "tuna"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+# optional: make this your default source for all installs
+priority = "primary"
+
+#[[tool.poetry.source]]
+#name = "devpi"
+#url = "http://localhost:3141/bt_sdk/dev/+simple/"
+# optional: make this your default source for all installs
+#priority = "secondary"
+
+[[tool.poetry.source]]
+name = "pypi"
+priority = "secondary"
+
 
 [build-system]
 requires = ["poetry-core"]
