@@ -4,8 +4,8 @@
 import signal
 import sys
 import uvicorn
-# import yaml
-from dotenv import load_dotenv
+import argparse
+
 
 def signal_handler(sig, frame):
     print("\nSignal handler called with signal", sig)
@@ -17,16 +17,18 @@ signal.signal(signal.SIGINT, signal_handler)
 
 
 def server():
+    # Create an ArgumentParser object
+    parser = argparse.ArgumentParser(description='A simple command-line interface for the CRM backend.')
 
-    load_dotenv()
+    # Add arguments
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to run the server on')
+    parser.add_argument('--port', type=int, default=8100, help='Port to run the server on')
 
-    # with open('config.yaml', 'r') as f:
-    #     config = yaml.safe_load(f)
+    # Parse the arguments
+    args = parser.parse_args()
 
-    # os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'] = config['ALIBABA_CLOUD_ACCESS_KEY_ID']
-    # os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'] = config['ALIBABA_CLOUD_ACCESS_KEY_SECRET']
     from web import app
-    uvicorn.run(app, host="0.0.0.0", port=8100)
+    uvicorn.run(app, host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

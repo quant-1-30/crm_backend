@@ -1,6 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import pandas as pd
 from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -26,9 +27,9 @@ class AsyncOps(with_metaclass(MetaParams, object)):
     params = (
         ("host", "localhost"),
         ("port", "5432"),
-        ("user", "postgres"),
-        ("pwd", "20210718"),
-        ("db", "ly_crm"),
+        # ("user", "postgres"),
+        # ("pwd", "20210718"),
+        # ("db", "ly_crm"),
         ("engine", "psycopg"),
         ("pool_size", 20),
         ("max_overflow", 10),
@@ -66,8 +67,11 @@ class AsyncOps(with_metaclass(MetaParams, object)):
         # postgresql+psycopg2cffi://user:password@host:port/dbname[?key=value&key=value...]
         # postgresql+psycopg2://me@localhost/mydb
         # postgresql+asyncpg://me@localhost/mydb
-        print("builder ", self)
-        url = f"postgresql+{self.p.engine}://{self.p.user}:{self.p.pwd}@{self.p.host}:{self.p.port}/{self.p.db}"
+        host = os.getenv('POSTGRES_HOST', 'localhost')
+        port = os.getenv('POSTGRES_PORT', '5432')
+        # connect url
+        url = f"postgresql+{self.p.engine}://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}\
+            @{host}:{port}/{os.environ['POSTGRES_DB']}"
         # isolation_level="AUTOCOMMIT"
         engine = create_async_engine(url, 
                                pool_size=self.p.pool_size, 
