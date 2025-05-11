@@ -5,6 +5,7 @@ import signal
 import sys
 import uvicorn
 import argparse
+#from dotenv import load_dotenv
 
 
 def signal_handler(sig, frame):
@@ -17,6 +18,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 
 def server():
+#    load_dotenv()
     # Create an ArgumentParser object
     parser = argparse.ArgumentParser(description='A simple command-line interface for the CRM backend.')
 

@@ -67,11 +67,10 @@ class AsyncOps(with_metaclass(MetaParams, object)):
         # postgresql+psycopg2cffi://user:password@host:port/dbname[?key=value&key=value...]
         # postgresql+psycopg2://me@localhost/mydb
         # postgresql+asyncpg://me@localhost/mydb
-        host = os.getenv('POSTGRES_HOST', 'localhost')
         port = os.getenv('POSTGRES_PORT', '5432')
         # connect url
-        url = f"postgresql+{self.p.engine}://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}\
-            @{host}:{port}/{os.environ['POSTGRES_DB']}"
+        url = f"postgresql+{self.p.engine}://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{os.environ['POSTGRES_HOST']}:{port}/{os.environ['POSTGRES_DB']}"
+        print("url ", url)
         # isolation_level="AUTOCOMMIT"
         engine = create_async_engine(url, 
                                pool_size=self.p.pool_size, 
