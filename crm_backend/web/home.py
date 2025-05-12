@@ -35,19 +35,23 @@ router = APIRouter()
 @router.post("/on_register")
 async def on_register(item: RegisterEvent):
     async with async_ops as ctx:
+        # import pdb; pdb.set_trace()
         data = item.model_dump()
-        verify_code = data.pop("verify_code")
-        eq = await verify_code(item.phone, verify_code)
+        code = data.pop("verify_code")
+        eq = await verify_code(item.phone, code)
+        print("eq ", eq)
 
         if not eq:
             return {"status": 1, "data": "verify code is incorrect"}
-        try:
-            refresh_user = await ctx.on_insert_obj(User(**data), return_obj=True)
-            # insert token
-            await ctx.on_insert_obj(Token(user_id=refresh_user[0].user_id))
-            return {"status": 0, "data": ''}
-        except Exception as e:
-            return {"status": 1, "data": str(e)}
+        # try:
+        print("data ", data, "User(**data) ", User(**data))
+        refresh_user = await ctx.on_insert_obj(User(**data), return_obj=True)
+        print("refresh_user ", refresh_user)
+        # insert token
+        await ctx.on_insert_obj(Token(user_id=refresh_user[0].user_id))
+        return {"status": 0, "data": ''}
+        # except Exception as e:
+        #     return {"status": 1, "data": str(e)}
         
 
 @router.post("/on_reset")
