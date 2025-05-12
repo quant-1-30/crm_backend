@@ -74,7 +74,8 @@ async def lifespan(app: FastAPI):
     print("🛑 Running on shutdown: Cleaning up resources...")
 
 # 创建 FastAPI 应用
-app = FastAPI(lifespan=lifespan)
+# slash False return 404 not 307
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 app.add_middleware(
     CORSMiddleware,

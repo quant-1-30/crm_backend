@@ -30,7 +30,7 @@ async def on_register(item: MemberShipEvent, user: User=Depends(get_current_user
             return {"status": 1, "data": str(e)}
         
 
-@router.get("/on_balance/")
+@router.get("/on_balance")
 async def on_balance(member_id: str):
     async with async_ops as ctx:
         # charge
