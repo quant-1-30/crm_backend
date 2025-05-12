@@ -14,16 +14,19 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory
 WORKDIR /app
 
+# 先复制依赖文件，利用 Docker 缓存
+COPY poetry-1.7.1-py3-none-any.whl pyproject.toml poetry.lock ./
+
+RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple \ 
+    && pip3 install poetry-1.7.1-py3-none-any.whl \
+    && poetry lock --no-update && poetry install 
+
 # Copy the rest of the application code into the image
 COPY . .
 
-RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN chmod +x ./init.sh 
 
-RUN pip3 install poetry-1.7.1-py3-none-any.whl
-
-RUN poetry lock --no-update && poetry install 
-
-RUN chmod +x ./init.sh
+ENV PYTHONPATH=/app
 
 # Command to run the application
 CMD ["bash", "./init.sh"]
