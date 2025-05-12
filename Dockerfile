@@ -15,18 +15,15 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Copy the rest of the application code into the image
-COPY . /app/
+COPY . .
 
 RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN pip3 install poetry-1.7.1-py3-none-any.whl
 
 RUN poetry lock --no-update && poetry install 
-#RUN poetry install 
 
-# Expose the port the app runs on
-#EXPOSE 8000
+RUN chmod +x ./init.sh
 
 # Command to run the application
-#CMD ["/root/.local/bin/poetry", "run", "python", "crm_backend/main.py"]
-CMD ["bash", "init.sh"]
+CMD ["bash", "./init.sh"]
