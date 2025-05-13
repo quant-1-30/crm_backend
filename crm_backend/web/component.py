@@ -75,6 +75,10 @@ async def verify_code(phone: str, verify_code: str):
 async def upload_file(files: list[UploadFile] = File(...), table: str=Form(...), user: User=Depends(get_current_user)):
 # async def upload_file(request: Request, user: User=Depends(get_current_user)):
     # form_data = await request.form()
+    orm_table = ProxyMapping.get(table, "")
+    if not orm_table:
+        return {"status": 1, "data": f"undefined{table}"}
+
     for file in files:
         # Form argument / query parameters direct add 
         proc = IoParse[file.filename.split(".")[-1]]
@@ -85,7 +89,7 @@ async def upload_file(files: list[UploadFile] = File(...), table: str=Form(...),
             df.loc[:, "user_id"] = user.user_id
             data = df.T.to_dict()
             async with async_ops as ctx:
-                orm_cls = ctx._orm_map[table]
+                orm_cls = ctx._orm_map[orm_table]
                 objs = [orm_cls(**v) for k, v in data.items()]
                 try:
                     await ctx.on_insert_obj(objs)
