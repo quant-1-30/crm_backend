@@ -130,7 +130,7 @@ class MemberShip(Base):
     name: Mapped[str] = mapped_column(String(30), use_existing_column=True)
     phone: Mapped[BigInteger] = mapped_column(BigInteger, unique=True)
     birth: Mapped[BigInteger] = mapped_column(BigInteger, default=0, use_existing_column=True)
-    # category: Mapped[str] = mapped_column(ForeignKey("customer.name"), use_existing_column=True)
+    balance: Mapped[int] = mapped_column(Integer, default=0, use_existing_column=True)
     # 计算默认值用server_default --- dababase 非default --- python
     # 默认日期 func.now / func.current_timestamp()
     register_time: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now(), use_existing_column=True)

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import json
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_, or_, update
 from fastapi import APIRouter, Depends
 
 from crm_backend.schema.operator import *
@@ -18,6 +18,7 @@ router = APIRouter()
 async def on_register(item: MemberShipEvent, user: User=Depends(get_current_user)):
     async with async_ops as ctx:
         data = item.model_dump()
+        print("on_register data ", data)
         data["user_id"] = user.user_id
         try:
             _obj = await ctx.on_insert_obj(MemberShip(**data), return_obj=True)
@@ -30,29 +31,34 @@ async def on_register(item: MemberShipEvent, user: User=Depends(get_current_user
             return {"status": 1, "data": str(e)}
         
 
-@router.get("/on_balance")
-async def on_balance(member_id: str):
-    async with async_ops as ctx:
-        # charge
-        req = select(ChargeRecord).where(ChargeRecord.member_id == member_id)
-        charge_objs = await ctx.on_query_obj(req)
-        charge_balance = sum([c[0].discount + c[0].charge for c in charge_objs])
-        # consume
-        req = select(ConsumeRecord).where(ConsumeRecord.member_id == member_id)
-        consume_obj = await ctx.on_query_obj(req)
-        consume_balance = sum([_c[0].consume for _c in consume_obj])
-        balance = charge_balance - consume_balance
-        return {"status": 0, "data": balance}
+@router.post("/on_update")
+async def on_update(event: UpdateEvent, user: User=Depends(get_current_user)):
+    print("on_update event ", event)
+    try:
+        async with async_ops as ctx:
+            upd = update(MemberShip).where(MemberShip.member_id == event.member_id).values(name=event.name, 
+                                                                                           phone=event.phone, 
+                                                                                           birth=event.birth)
+            await ctx.on_update(upd)
+            return {"status": 0, "data": ""}
+    except Exception as e:
+        return {"status": 1, "data": str(e)}
 
 
 @router.post("/on_consume")
 async def on_consume(event: MemberEvent, user: User=Depends(get_current_user)):
     async with async_ops as ctx:
-
         # membership 
         req = select(MemberShip).where(MemberShip.member_id == event.member_id)
         m_obj = await ctx.on_query_obj(req)
         print("m_obj ", m_obj[0][0])
+        # update balance
+        balance = m_obj[0][0].balance + int(event.charge) + int(event.discount) - int(event.consume)
+        if balance < 0:
+            return {"status": 1, "data": balance}
+
+        upd = update(MemberShip).where(MemberShip.member_id == event.member_id).values(balance=balance)
+        await ctx.on_update(upd)
 
         if event.charge:
             charge_dict = event.model_dump(exclude={"consume", "balance"})
@@ -72,13 +78,14 @@ async def on_consume(event: MemberEvent, user: User=Depends(get_current_user)):
             # send message
             if event.charge:
                 template_code = _Template.charge.value
-                template_param = json.dumps({"name": m_obj[0][0].name, "charge": event.charge, "balance": event.balance})
+                template_param = json.dumps({"name": m_obj[0][0].name, "charge": event.charge, "balance": balance})
                 await sender.send_message(m_obj[0][0].phone, template_code, template_param)
+                print("send charge message success")
             if event.consume:
                 template_code = _Template.consume.value
-                template_param = json.dumps({"name": m_obj[0][0].name, "consume": event.consume, "balance": event.balance})
+                template_param = json.dumps({"name": m_obj[0][0].name, "consume": event.consume, "balance": balance})
                 await sender.send_message(m_obj[0][0].phone, template_code, template_param) 
-
+                print("send consume message success")
             return {"status": 0, "data": ""}
         except Exception as e:
             return {"status": 1, "data": str(e)}

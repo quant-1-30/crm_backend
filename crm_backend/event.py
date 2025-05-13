@@ -35,6 +35,13 @@ class RegisterEvent(BaseModel):
     # def serialize_timestamp(self, timestamp: datetime) -> str:
     #     return timestamp.strftime('%Y-%m-%d %H:%M:%S')
 
+class UpdateEvent(BaseModel):
+
+    member_id: str
+    name: str
+    phone: int
+    birth: int
+
 
 class LoginEvent(BaseModel):
      
@@ -53,7 +60,7 @@ class MemberShipEvent(BaseModel):
     name: str
     phone: int
     birth: int
-    
+    balance: int = Field(default=0)
 
 class MemberEvent(BaseModel):
 
@@ -61,7 +68,6 @@ class MemberEvent(BaseModel):
     charge: int
     discount: int
     consume: int
-    balance: int
 
 
 class CoporateEvent(BaseModel):
@@ -91,4 +97,4 @@ class RespEvent(BaseModel):
      error: str
 
 
-__all__ = ["LoginEvent", "RegisterEvent", "ResetEvent", "MemberShipEvent", "MemberEvent", "StatsEvent", "ReqEvent", "RespEvent"]
+__all__ = ["LoginEvent", "RegisterEvent", "ResetEvent", "MemberShipEvent", "MemberEvent", "StatsEvent", "ReqEvent", "RespEvent", "UpdateEvent"]
