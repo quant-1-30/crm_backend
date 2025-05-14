@@ -1,6 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import json
 from toolz import valfilter
 from fastapi import FastAPI, Request
@@ -81,12 +82,11 @@ app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 app.add_middleware(
     CORSMiddleware,
     # when fronted is set cors , * is not allowed
-    # allow_origins=["*"],  # 允许所有来源。可以是特定域名列表。
-    allow_origins=["http://localhost:3000"],  # 允许的源
+    allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),     # 允许所有来源。可以是特定域名列表。 
     allow_credentials=True,
-    allow_methods=["*"],  # 允许所有方法（如 GET、POST）。
-    allow_headers=["*"],  # 允许所有头。
-) 
+    allow_methods=os.getenv("CORS_METHODS", "*").split(","),    # 允许所有方法（如 GET、POST）。
+    allow_headers=os.getenv("CORS_HEADERS", "*").split(","),    # 允许所有头。
+)
 
 
 @app.middleware("http")
