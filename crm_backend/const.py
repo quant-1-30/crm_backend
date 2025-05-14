@@ -31,11 +31,5 @@ class _Template(enum.Enum):
 
 
 
-ProxyMapping = {
-    "协议单位": "coporate",
-    "协议单位价格": "coporate_info",
-}
-
-
-__all__ = ["_Categorical", "_Template", "ProxyMapping"]
+__all__ = ["_Categorical", "_Template"]
 

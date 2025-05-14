@@ -79,9 +79,9 @@ class CoporateEvent(BaseModel):
 
 class StatsEvent(BaseModel):
 
-    start_date: int
-    end_date: int
-    freq: str
+    startDate: str
+    endDate: str
+    frequency: str
 
 
 class ReqEvent(BaseModel):

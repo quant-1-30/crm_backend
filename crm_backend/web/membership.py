@@ -22,9 +22,6 @@ async def on_register(item: MemberShipEvent, user: User=Depends(get_current_user
         data["user_id"] = user.user_id
         try:
             _obj = await ctx.on_insert_obj(MemberShip(**data), return_obj=True)
-            # data = {"name": _obj[0].name, 
-            #         "member_id": _obj[0].member_id, 
-            #         "phone": _obj[0].phone}
             data = _obj[0].model_to_dict()
             return {"status": 0, "data": data}
         except Exception as e:
@@ -93,7 +90,7 @@ async def on_consume(event: MemberEvent, user: User=Depends(get_current_user)):
 
 @router.get("/charge_detail")
 # async def on_charge_detail(event: ReqEvent=Depends()):
-async def on_charge_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101):
+async def on_charge_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101, user: str=Depends(get_current_user)):
     async with async_ops as ctx:
         start_dt = datetime.datetime.strptime(str(start_date), "%Y%m%d")
         end_dt = datetime.datetime.strptime(str(end_date), "%Y%m%d")
@@ -103,19 +100,13 @@ async def on_charge_detail(member_id: str="", start_date: int=19900101, end_date
 
         # row_objs
         _obj = await ctx.on_query_obj(req)
-        # records= [{"name": row[0].name,
-        #            "charge": row[0].charge,
-        #            "created_at": row[0].created_at,
-        #            "discount": row[0].discount,
-        #            "operator": row[0].operator} 
-        #            for row in _obj]
         records = [row[0].model_to_dict() for row in _obj]
         return {"status": "success", "data": records}
     
 
 @router.get('/consume_detail')
 # async def on_consume_detail(event: ReqEvent=Depends()):
-async def on_consume_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101):
+async def on_consume_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101, user: str=Depends(get_current_user)):
     async with async_ops as ctx:
         start_dt = datetime.datetime.strptime(str(start_date), "%Y%m%d")
         end_dt = datetime.datetime.strptime(str(end_date), "%Y%m%d")
@@ -124,17 +115,12 @@ async def on_consume_detail(member_id: str="", start_date: int=19900101, end_dat
         req = req.where(ConsumeRecord.member_id == member_id)
 
         _obj = await ctx.on_query_obj(req)  
-        # records = [{"name": row[0].name,
-        #             "consume": row[0].consume,
-        #             "created_at": row[0].created_at,
-        #             "operator": row[0].operator}
-        #             for row in _obj] 
         records = [row[0].model_to_dict() for row in _obj]
         return {"status": "success", "data": records}
 
 
 @router.get("/list")
-async def on_query():
+async def on_query(user: str=Depends(get_current_user)):
     async with async_ops as ctx:
         req = select(MemberShip)
         # obj ---> row object

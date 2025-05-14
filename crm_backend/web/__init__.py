@@ -13,13 +13,14 @@ from schema.schema import Categorical
 from schema.operator import *
 from schema.schema import *
 from plugin.message import sender
-from utils.dt_utility import int2date
+from utils.dt_utility import str2date
 from const import *
 from .home import router as login_router
 from .membership import router as membership_router
 from .coporate import router as coporate_router
 from .component import router as component_router
-from .stats import router as stats_router
+from .analyzer import router as analyzer_router
+from .dashboard import router as dashboard_router
 # from .ws import router as ws_router
 
 
@@ -33,7 +34,7 @@ async def scheduled_task():
     async with async_ops as ctx:
         req = select(MemberShip)
         objs = await ctx.on_query_obj(req)
-        members_birth = {"_".join([obj.member_name, obj.member_phone]): int2date(obj.birth_date) for obj in objs}
+        members_birth = {"_".join([obj.member_name, obj.member_phone]): str2date(obj.birth_date) for obj in objs}
         on_birth = valfilter(lambda x: x.month == now.month and x.day == now.day, members_birth)
 
         for name_phone, birthday in on_birth.items():
@@ -79,11 +80,14 @@ app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有来源。可以是特定域名列表。
+    # when fronted is set cors , * is not allowed
+    # allow_origins=["*"],  # 允许所有来源。可以是特定域名列表。
+    allow_origins=["http://localhost:3000"],  # 允许的源
     allow_credentials=True,
     allow_methods=["*"],  # 允许所有方法（如 GET、POST）。
     allow_headers=["*"],  # 允许所有头。
 ) 
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -102,5 +106,6 @@ app.include_router(login_router, prefix="/home")
 app.include_router(membership_router, prefix="/membership")
 app.include_router(coporate_router, prefix="/coporate")
 app.include_router(component_router, prefix="/component")
-app.include_router(stats_router, prefix="/stats")
+app.include_router(analyzer_router, prefix="/analyzer")
+app.include_router(dashboard_router, prefix="/dashboard")
 # app.include_router(ws_router, prefix="/ws")

@@ -46,7 +46,7 @@ async def get_current_user(token: str=Depends(oauth2_scheme)):
     
 
 @router.post("/on_sms")
-async def on_sms(requst: Request):
+async def on_sms(requst: Request, user: User=Depends(get_current_user)):
     data = await requst.json()
 
     verify_code = np.random.randint(100000, 999999)
@@ -73,31 +73,25 @@ async def verify_code(phone: str, verify_code: str):
 
 @router.post("/upload")
 async def upload_file(files: list[UploadFile] = File(...), table: str=Form(...), user: User=Depends(get_current_user)):
-# async def upload_file(request: Request, user: User=Depends(get_current_user)):
     # form_data = await request.form()
-    orm_table = ProxyMapping.get(table, "")
-    if not orm_table:
-        return {"status": 1, "data": f"undefined{table}"}
-
-    for file in files:
-        # Form argument / query parameters direct add 
-        proc = IoParse[file.filename.split(".")[-1]]
-        # Read the file content (as bytes)
-        with BytesIO(await file.read()) as contents:
-            df = proc(contents)
-            temp = df.T.to_dict()
-            df.loc[:, "user_id"] = user.user_id
-            data = df.T.to_dict()
-            async with async_ops as ctx:
-                orm_cls = ctx._orm_map[orm_table]
-                objs = [orm_cls(**v) for k, v in data.items()]
-                try:
+    try:
+        for file in files:
+            # Form argument / query parameters direct add 
+            proc_engine = IoParse[file.filename.split(".")[-1]]
+            # Read the file content (as bytes)
+            with BytesIO(await file.read()) as contents:
+                df = proc_engine(contents)
+                temp = df.T.to_dict()
+                df.loc[:, "user_id"] = user.user_id
+                data = df.T.to_dict()
+                async with async_ops as ctx:
+                    orm_cls = ctx._orm_map[table]
+                    objs = [orm_cls(**v) for k, v in data.items()]
                     await ctx.on_insert_obj(objs)
                     return {"status": 0,"data": list(temp.values())}
-                
-                except Exception as e:
-                    print("e ", e)
-                    return {"status": 1,  "data": str(e)}
+    except Exception as e:
+        return {"status": 1,  "data": str(e)}
+
 
 @router.get("/api")
 def api():
