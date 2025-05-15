@@ -8,7 +8,6 @@ def str2date(date: Union[int, str], fmt: str="%Y%m%d"):
     struct_dt = datetime.strptime(str(date), fmt)
     return struct_dt
 
-
 def iso_unpack(date: datetime, freq: str):
     if freq == "day":
         return date.strftime("%Y%m%d")
@@ -16,7 +15,6 @@ def iso_unpack(date: datetime, freq: str):
         return date.isocalendar()[1]
     else:
         return date.isocalendar()[0]
-
 
 def parse_date_range(start_date: str, end_date: str, fmt="%Y-%m-%d") -> tuple[datetime, datetime]   :
     """解析日期范围并设置时间边界"""

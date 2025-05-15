@@ -10,7 +10,7 @@ from crm_backend.event import *
 from crm_backend.const import *
 from crm_backend.plugin.message import sender
 from .component import get_current_user
-
+from utils.dt_utility import parse_date_range
 router = APIRouter()
 
 
@@ -90,48 +90,57 @@ async def on_consume(event: MemberEvent, user: User=Depends(get_current_user)):
 
 @router.get("/charge_detail")
 # async def on_charge_detail(event: ReqEvent=Depends()):
-async def on_charge_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101, user: str=Depends(get_current_user)):
+async def on_charge_detail(member_id: str="", 
+                           startDate: str="", 
+                           endDate: str="", 
+                           user: str=Depends(get_current_user)):
     async with async_ops as ctx:
-        start_dt = datetime.datetime.strptime(str(start_date), "%Y%m%d")
-        end_dt = datetime.datetime.strptime(str(end_date), "%Y%m%d")
+        if startDate and endDate:
+            ranges = parse_date_range(startDate, endDate)
+        else:
+            ranges = [datetime.datetime(1990, 1, 1), datetime.datetime.now()]
+
         # charge record
-        req = select(ChargeRecord).where(ChargeRecord.created_at.between(start_dt, end_dt))
+        req = select(ChargeRecord).where(ChargeRecord.created_at.between(ranges[0], ranges[1]))
         req = req.where(ChargeRecord.member_id == member_id)
 
         # row_objs
         _obj = await ctx.on_query_obj(req)
         records = [row[0].model_to_dict() for row in _obj]
-        return {"status": "success", "data": records}
+        return {"status": 0, "data": records}
     
 
 @router.get('/consume_detail')
-# async def on_consume_detail(event: ReqEvent=Depends()):
-async def on_consume_detail(member_id: str="", start_date: int=19900101, end_date: int=20500101, user: str=Depends(get_current_user)):
+async def on_consume_detail(member_id: str="", 
+                            startDate: str="", 
+                            endDate: str="", 
+                            user: str=Depends(get_current_user)):
     async with async_ops as ctx:
-        start_dt = datetime.datetime.strptime(str(start_date), "%Y%m%d")
-        end_dt = datetime.datetime.strptime(str(end_date), "%Y%m%d")
+        if startDate and endDate:
+            ranges = parse_date_range(startDate, endDate)
+        else:
+            ranges = [datetime.datetime(1990, 1, 1), datetime.datetime.now()]
+
         # consume record
-        req = select(ConsumeRecord).where(ConsumeRecord.created_at.between(start_dt, end_dt))
+        req = select(ConsumeRecord).where(ConsumeRecord.created_at.between(ranges[0], ranges[1]))
         req = req.where(ConsumeRecord.member_id == member_id)
 
         _obj = await ctx.on_query_obj(req)  
         records = [row[0].model_to_dict() for row in _obj]
-        return {"status": "success", "data": records}
+        return {"status": 0, "data": records}
 
 
 @router.get("/list")
 async def on_query(user: str=Depends(get_current_user)):
-    async with async_ops as ctx:
-        req = select(MemberShip)
-        # obj ---> row object
-        data = await ctx.on_query_obj(req)
-        # records = [{"name": item[0].name, 
-        #          "member_id": item[0].member_id, 
-        #          "phone": item[0].phone, 
-        #          "birth": item[0].birth}
-        #          for item in data]
-        records = [row[0].model_to_dict() for row in data]
-        return {"status": "success", "data": records}
+    try:
+        async with async_ops as ctx:
+            req = select(MemberShip)
+            # obj ---> row object
+            data = await ctx.on_query_obj(req)
+            records = [row[0].model_to_dict() for row in data]
+            return {"status": 0, "data": records}
+    except Exception as e:
+        return {"status": 1, "data": str(e)}
     
 
 @router.get("/api")
