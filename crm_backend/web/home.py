@@ -52,9 +52,11 @@ async def on_login(item: LoginEvent):
         if user:
             req = select(Token).where(Token.user_id == str(user[0][0].user_id))
             resp = await ctx.on_query_obj(req)
-            return {"status": 0,  "data": resp[0][0].token}
+            return {"status": 0, "data": 
+                                       {"token": resp[0][0].token, "name": user[0][0].name}}
         else:
             return {"status": 1, "error": "Invalid user_id / password"}
+            
             # raise HTTPException(
             #     status_code=status.HTTP_401_UNAUTHORIZED,
             #     detail="Invalid token",
