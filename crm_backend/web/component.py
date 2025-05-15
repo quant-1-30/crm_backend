@@ -46,7 +46,9 @@ async def get_current_user(token: str=Depends(oauth2_scheme)):
     
 
 @router.post("/on_sms")
-async def on_sms(requst: Request, user: User=Depends(get_current_user)):
+# login module need sms which have not token
+# async def on_sms(requst: Request, user: User=Depends(get_current_user)):
+async def on_sms(requst: Request):
     data = await requst.json()
 
     verify_code = np.random.randint(100000, 999999)
